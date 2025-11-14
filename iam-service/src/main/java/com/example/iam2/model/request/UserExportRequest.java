@@ -3,6 +3,7 @@ package com.example.iam2.model.request;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class UserExportRequest {
@@ -21,4 +22,6 @@ public class UserExportRequest {
     private Integer yearsOfEx;
     private Boolean locked;
     private Boolean deleted;
+    private List<String> roles;
+
 }

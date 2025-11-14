@@ -1,5 +1,7 @@
 package com.example.storage.service.impl;
 
+import com.example.iam2.entity.UserEntity;
+import com.example.iam2.specification.UserSpecification;
 import com.example.storage.builder.FileSearchBuilder;
 import com.example.storage.converter.FileConverter;
 import com.example.storage.converter.FileSearchBuilderConverter;
@@ -12,11 +14,17 @@ import com.example.storage.model.response.PagedResponse;
 import com.example.storage.repository.FileRepository;
 import com.example.storage.service.CloudinaryService;
 import com.example.storage.service.FileService;
+import com.example.storage.specification.FileSpecification;
 import com.example.storage.util.CloudinaryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
 
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -43,12 +51,11 @@ public class FileServiceImpl implements FileService {
     private CloudinaryService cloudinaryService;
 
     @Override
-    public PagedResponse<FileDTO> getAll(FileSearchRequest fileSearchRequest, int page, int size) {
+    public Page<FileDTO> getAll(FileSearchRequest fileSearchRequest, int page, int size) {
         FileSearchBuilder fileSearchBuilder = fileSearchBuilderConverter.toFileSearchBuilder(fileSearchRequest);
-        List<FileEntity> fileEntityList = fileRepository.getAll(fileSearchBuilder, page, size);
-        long totalItems = fileRepository.countAll(fileSearchBuilder);
-        List<FileDTO> dtos = fileEntityList.stream().map(fileConverter::toFileDTO).toList();
-        return new PagedResponse<>(dtos, page, size, totalItems);
+        Specification<FileEntity> spec = FileSpecification.filter(fileSearchBuilder);
+        Page<FileEntity> entityPage = fileRepository.findAll(spec, PageRequest.of(page - 1, size));
+        return entityPage.map(fileConverter::toFileDTO);
     }
 
     @Override

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,5 +24,5 @@ public class UserDTO {
     private Integer yearsOfEx;
     private Boolean locked;
     private Boolean deleted;
-    List<RoleDTO> roleDTOList;
+    Set<RoleDTO> roleDTOList;
 }

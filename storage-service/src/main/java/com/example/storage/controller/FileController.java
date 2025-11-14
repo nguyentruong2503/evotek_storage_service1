@@ -3,10 +3,9 @@ package com.example.storage.controller;
 import com.example.storage.model.dto.FileDTO;
 import com.example.storage.model.request.FileSearchRequest;
 import com.example.storage.model.request.UpdateFileRequest;
-import com.example.storage.model.response.PagedResponse;
 import com.example.storage.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -108,7 +107,7 @@ public class FileController {
     }
 
     @PostMapping("/search")
-    public PagedResponse<FileDTO> searchFiles(
+    public Page<FileDTO> searchFiles(
             @RequestBody FileSearchRequest fileSearchRequest,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size) {

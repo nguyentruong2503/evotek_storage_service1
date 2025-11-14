@@ -7,9 +7,9 @@ import com.example.iam2.model.request.UserExportRequest;
 import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.model.response.UserDetail;
 import com.example.iam2.model.response.UserProfile;
-import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -97,13 +97,16 @@ public class UserController {
                 ));
     }
 
-    @GetMapping
+    @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public PagedResponse<UserDTO> getAllUsers(
+    public Page<UserDTO> getAllUsers(
+            @RequestBody UserExportRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return userService.getAllUsers(page, size);
+
+        return userService.searchUsers(request, page, size);
     }
+
 
     @GetMapping("/profile/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")

@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
@@ -94,7 +95,7 @@ public class StorageProxyService {
         storageServiceClient.deleteFile(id);
     }
 
-    public PagedResponse<FileDTO> searchFiles(FileSearchRequest req, int page, int size) {
+    public Page<FileDTO> searchFiles(FileSearchRequest req, int page, int size) {
         return storageServiceClient.searchFiles(req, page, size);
     }
 

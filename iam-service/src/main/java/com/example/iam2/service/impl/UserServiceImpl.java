@@ -1,8 +1,8 @@
 package com.example.iam2.service.impl;
 
-import com.example.iam2.builder.UserExportBuilder;
+import com.example.iam2.builder.UserBuilder;
 import com.example.iam2.converter.UserConverter;
-import com.example.iam2.converter.UserExportBuilderConverter;
+import com.example.iam2.converter.UserBuilderConverter;
 import com.example.iam2.entity.RoleEntity;
 import com.example.iam2.entity.UserEntity;
 import com.example.iam2.exception.DuplicateException;
@@ -13,13 +13,13 @@ import com.example.iam2.model.dto.RoleDTO;
 import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.request.UserExcelDTO;
 import com.example.iam2.model.request.UserExportRequest;
-import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.model.response.UserDetail;
 import com.example.iam2.model.response.UserProfile;
 import com.example.iam2.repository.RoleRepository;
 import com.example.iam2.repository.UserRepository;
 import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
+import com.example.iam2.specification.UserSpecification;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jxls.common.Context;
@@ -27,6 +27,9 @@ import org.jxls.util.JxlsHelper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -41,8 +44,6 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,7 +66,7 @@ public class UserServiceImpl implements UserService {
     private UserConverter userConverter;
 
     @Autowired
-    private UserExportBuilderConverter userExportBuilderConverter;
+    private UserBuilderConverter userBuilderConverter;
 
     @Autowired
     private JwtDecoder keycloakJwtDecoder;
@@ -97,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
         UserEntity userEntity = modelMapper.map(userDTO,UserEntity.class);
         RoleEntity defaultRole= roleRepository.findByCode("ROLE_USER");
-        userEntity.setRoles(Collections.singletonList(defaultRole));
+        userEntity.setRoles(Collections.singleton(defaultRole));
         userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userEntity.setLocked(false);
         userEntity.setDeleted(false);
@@ -157,14 +158,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PagedResponse<UserDTO> getAllUsers(int page, int size) {
-        List<UserEntity> entities = userRepository.getAll(page, size);
-        long totalItems = userRepository.countAll();
-        List<UserDTO> dtos = entities.stream()
-                .map(userConverter::toUserDTO)
-                .toList();
-
-        return new PagedResponse<>(dtos, page, size, totalItems);
+    public Page<UserDTO> searchUsers(UserExportRequest request, int page, int size) {
+        UserBuilder builder = userBuilderConverter.toUserBuilder(request, request.getRoles());
+        Specification<UserEntity> spec = UserSpecification.filter(builder);
+        Page<UserEntity> entityPage = userRepository.findAll(spec, PageRequest.of(page - 1, size));
+        return entityPage.map(userConverter::toUserDTO);
     }
 
     @Override
@@ -318,108 +316,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-//    @Override
-//    public ByteArrayInputStream exportUsers(UserExportRequest request) throws IOException {
-//        UserExportBuilder builder = userExportBuilderConverter.toUserExportBuilder(request);
-//
-//        List<UserEntity> users = userRepository.importByFilter(builder);
-//
-//        Workbook workbook = new XSSFWorkbook();
-//        Sheet sheet = workbook.createSheet("Users");
-//
-//        Font headerFont = workbook.createFont();
-//        headerFont.setBold(true);
-//        headerFont.setColor(IndexedColors.WHITE.getIndex());
-//        headerFont.setFontName("Times New Roman");
-//
-//        CellStyle headerCellStyle = workbook.createCellStyle();
-//        headerCellStyle.setFont(headerFont);
-//        headerCellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
-//        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-//        headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-//        headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-//        headerCellStyle.setBorderBottom(BorderStyle.THIN);
-//        headerCellStyle.setBorderTop(BorderStyle.THIN);
-//        headerCellStyle.setBorderRight(BorderStyle.THIN);
-//        headerCellStyle.setBorderLeft(BorderStyle.THIN);
-//
-//        Font dataFont = workbook.createFont();
-//        dataFont.setFontName("Times New Roman");
-//
-//        CellStyle dataStyle = workbook.createCellStyle();
-//        dataStyle.setFont(dataFont);
-//        dataStyle.setWrapText(true);
-//        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-//        dataStyle.setBorderBottom(BorderStyle.THIN);
-//        dataStyle.setBorderTop(BorderStyle.THIN);
-//        dataStyle.setBorderRight(BorderStyle.THIN);
-//        dataStyle.setBorderLeft(BorderStyle.THIN);
-//
-//        String[] headers = {
-//                "STT", "Username", "Email", "First Name", "Last Name", "Date of Birth",
-//                "Phone", "Street", "Ward", "District", "Province", "Years of Experience",
-//                "Locked", "Deleted"
-//        };
-//
-//        Row headerRow = sheet.createRow(0);
-//        for (int i = 0; i < headers.length; i++) {
-//            Cell cell = headerRow.createCell(i);
-//            cell.setCellValue(headers[i]);
-//            cell.setCellStyle(headerCellStyle);
-//        }
-//
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-//        int rowNum = 1;
-//        for (UserEntity user : users) {
-//            Row row = sheet.createRow(rowNum++);
-//
-//            row.createCell(0).setCellValue(rowNum - 1); // STT
-//            row.createCell(1).setCellValue(Optional.ofNullable(user.getUsername()).orElse(""));
-//            row.createCell(2).setCellValue(Optional.ofNullable(user.getEmail()).orElse(""));
-//            row.createCell(3).setCellValue(Optional.ofNullable(user.getFirstName()).orElse(""));
-//            row.createCell(4).setCellValue(Optional.ofNullable(user.getLastName()).orElse(""));
-//            row.createCell(5).setCellValue(
-//                    user.getBirthday() != null ? dateFormat.format(user.getBirthday()) : "");
-//            row.createCell(6).setCellValue(Optional.ofNullable(user.getPhone()).orElse(""));
-//            row.createCell(7).setCellValue(Optional.ofNullable(user.getStreet()).orElse(""));
-//            row.createCell(8).setCellValue(Optional.ofNullable(user.getWard()).orElse(""));
-//            row.createCell(9).setCellValue(Optional.ofNullable(user.getDistrict()).orElse(""));
-//            row.createCell(10).setCellValue(Optional.ofNullable(user.getProvince()).orElse(""));
-//            row.createCell(11).setCellValue(
-//                    user.getYearsOfEx() != null ? user.getYearsOfEx() : 0);
-//            row.createCell(12).setCellValue(
-//                    user.getLocked() != null && user.getLocked() ? "Yes" : "No");
-//            row.createCell(13).setCellValue(
-//                    user.getDeleted() != null && user.getDeleted() ? "Yes" : "No");
-//
-//            for (int i = 0; i < headers.length; i++) {
-//                row.getCell(i).setCellStyle(dataStyle);
-//            }
-//        }
-//        for (int i = 0; i < headers.length; i++) {
-//            sheet.autoSizeColumn(i);
-//        }
-//
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        workbook.write(out);
-//        workbook.close();
-//
-//        return new ByteArrayInputStream(out.toByteArray());
-//    }
-
     @Override
     public ByteArrayInputStream exportUsers(UserExportRequest request) throws IOException {
-        UserExportBuilder builder = userExportBuilderConverter.toUserExportBuilder(request);
-        List<UserEntity> users = userRepository.exportByFilter(builder);
-        System.out.println("Export user count = " + users.size());
-
+        List<String> roles = request.getRoles();
+        UserBuilder builder = userBuilderConverter.toUserBuilder(request,roles);
+        Specification<UserEntity> spec = UserSpecification.filter(builder);
+        List<UserEntity> users = userRepository.findAll(spec);
 
         Map<String, Object> beans = new HashMap<>();
         beans.put("users", users);
         beans.put("dateFormat", new SimpleDateFormat("dd/MM/yyyy"));
 
         Context context = new Context(beans);
-
         try (InputStream is = getClass().getResourceAsStream("/templates/users_template.xlsx");
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
@@ -428,5 +336,4 @@ public class UserServiceImpl implements UserService {
             return new ByteArrayInputStream(os.toByteArray());
         }
     }
-
 }

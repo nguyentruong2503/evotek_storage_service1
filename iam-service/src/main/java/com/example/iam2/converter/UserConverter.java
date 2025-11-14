@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -18,9 +19,9 @@ public class UserConverter {
 
     public UserDTO toUserDTO(UserEntity userEntity){
         UserDTO userDTO = modelMapper.map(userEntity, UserDTO.class);
-        List<RoleDTO> roleDTOs = userEntity.getRoles().stream()
+        Set<RoleDTO> roleDTOs = userEntity.getRoles().stream()
                 .map(role -> modelMapper.map(role, RoleDTO.class))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         userDTO.setRoleDTOList(roleDTOs);
         return userDTO;
     }

@@ -15,6 +15,7 @@ public class FileSearchBuilder {
     private LocalDateTime updatedAt;
 
     private FileSearchBuilder(Builder builder){
+        this.id = builder.id;
         this.name = builder.name;
         this.size = builder.size;
         this.type = builder.type;

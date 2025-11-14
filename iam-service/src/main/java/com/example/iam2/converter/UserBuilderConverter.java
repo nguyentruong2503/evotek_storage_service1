@@ -1,16 +1,17 @@
 package com.example.iam2.converter;
 
-import com.example.iam2.builder.UserExportBuilder;
+import com.example.iam2.builder.UserBuilder;
 import com.example.iam2.model.request.UserExportRequest;
 import com.example.iam2.util.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 @Component
-public class UserExportBuilderConverter {
-    public UserExportBuilder toUserExportBuilder (UserExportRequest userExportRequest){
-        UserExportBuilder userExportBuilder = new UserExportBuilder.Builder()
+public class UserBuilderConverter {
+    public UserBuilder toUserBuilder (UserExportRequest userExportRequest, List<String> roles){
+        UserBuilder userBuilder = new UserBuilder.Builder()
                 .setUsername(MapUtils.getObject(userExportRequest.getUsername(),String.class))
                 .setEmail(MapUtils.getObject(userExportRequest.getEmail(), String.class))
                 .setFirstName(MapUtils.getObject(userExportRequest.getFirstName(), String.class))
@@ -24,7 +25,8 @@ public class UserExportBuilderConverter {
                 .setYearsOfEx(MapUtils.getObject(userExportRequest.getYearsOfEx(), Integer.class))
                 .setLocked(MapUtils.getObject(userExportRequest.getLocked(), Boolean.class))
                 .setDeleted(MapUtils.getObject(userExportRequest.getDeleted(), Boolean.class))
+                .setRoles(roles)
                 .build();
-        return userExportBuilder;
+        return userBuilder;
     }
 }

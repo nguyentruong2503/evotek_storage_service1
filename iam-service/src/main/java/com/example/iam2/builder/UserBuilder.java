@@ -1,8 +1,9 @@
 package com.example.iam2.builder;
 
 import java.util.Date;
+import java.util.List;
 
-public class UserExportBuilder {
+public class UserBuilder {
     private Long id;
     private String username;
     private String password;
@@ -19,7 +20,9 @@ public class UserExportBuilder {
     private Boolean locked;
     private Boolean deleted;
 
-    private UserExportBuilder(Builder builder) {
+    private List<String> roles;
+
+    private UserBuilder(Builder builder) {
         this.id = builder.id;
         this.username = builder.username;
         this.password = builder.password;
@@ -35,6 +38,7 @@ public class UserExportBuilder {
         this.yearsOfEx = builder.yearsOfEx;
         this.locked = builder.locked;
         this.deleted = builder.deleted;
+        this.roles = builder.roles;
     }
 
     // Getter methods
@@ -54,6 +58,10 @@ public class UserExportBuilder {
     public Boolean getLocked() { return locked; }
     public Boolean getDeleted() { return deleted; }
 
+    public List<String> getRoles() {
+        return roles;
+    }
+
     // Inner static Builder class
     public static class Builder {
         private Long id;
@@ -71,6 +79,7 @@ public class UserExportBuilder {
         private Integer yearsOfEx;
         private Boolean locked;
         private Boolean deleted;
+        private List<String> roles;
 
         public Builder setId(Long id) {
             this.id = id;
@@ -147,8 +156,13 @@ public class UserExportBuilder {
             return this;
         }
 
-        public UserExportBuilder build() {
-            return new UserExportBuilder(this);
+        public Builder setRoles(List<String> roles){
+            this.roles = roles;
+            return this;
+        }
+
+        public UserBuilder build() {
+            return new UserBuilder(this);
         }
     }
 }

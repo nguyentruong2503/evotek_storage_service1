@@ -6,6 +6,7 @@ import com.example.iam2.model.request.UpdateFileRequest;
 import com.example.iam2.model.response.PagedResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,9 +57,9 @@ public interface StorageServiceClient {
     void deleteFile(@PathVariable("id") Long id);
 
     @PostMapping("/api/file/search")
-    PagedResponse<FileDTO> searchFiles(@RequestBody FileSearchRequest request,
-                                       @RequestParam(defaultValue = "1") int page,
-                                       @RequestParam(defaultValue = "5") int size);
+    Page<FileDTO> searchFiles(@RequestBody FileSearchRequest request,
+                              @RequestParam(defaultValue = "1") int page,
+                              @RequestParam(defaultValue = "5") int size);
 
     @PutMapping("/api/file/{id}")
     FileDTO updateFile(

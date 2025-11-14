@@ -101,7 +101,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         if (response.getStatusCode() == HttpStatus.CREATED) {
             UserEntity userEntity = modelMapper.map(userDTO,UserEntity.class);
             RoleEntity defaultRole= roleRepository.findByCode("ROLE_USER");
-            userEntity.setRoles(Collections.singletonList(defaultRole));
+            userEntity.setRoles(Collections.singleton(defaultRole));
             userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
             userEntity.setCreatedBy("keycloak");
             userEntity.setLocked(false);

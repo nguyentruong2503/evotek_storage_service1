@@ -8,6 +8,7 @@ import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.service.StorageProxyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,9 +76,9 @@ public class FileProxyController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<PagedResponse<FileDTO>> search(@RequestBody FileSearchRequest req,
-                                                         @RequestParam(defaultValue = "1") int page,
-                                                         @RequestParam(defaultValue = "5") int size) {
+    public ResponseEntity<Page<FileDTO>> search(@RequestBody FileSearchRequest req,
+                                                @RequestParam(defaultValue = "1") int page,
+                                                @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(storageProxyService.searchFiles(req, page, size));
     }
 
