@@ -11,6 +11,6 @@ public interface UserRepositoryCustom {
     long countAll();
     Optional<UserEntity> findByUsernameWithRolesAndPermissions(String username);
 
-    List<UserEntity> importByFilter(UserExportBuilder builder);
+    List<UserEntity> exportByFilter(UserExportBuilder builder);
 
 }

@@ -90,7 +90,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     }
 
     @Override
-    public List<UserEntity> importByFilter(UserExportBuilder builder) {
+    public List<UserEntity> exportByFilter(UserExportBuilder builder) {
         StringBuilder sql = new StringBuilder("SELECT DISTINCT u.* FROM users u ");
         StringBuilder where = new StringBuilder(" WHERE 1=1 ");
         queryNormal(builder, where);
@@ -99,6 +99,5 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         Query query = entityManager.createNativeQuery(sql.toString(), UserEntity.class);
         return query.getResultList();
     }
-
 
 }

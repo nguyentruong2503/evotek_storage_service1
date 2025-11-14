@@ -19,7 +19,6 @@ public class UserExportBuilder {
     private Boolean locked;
     private Boolean deleted;
 
-    // Private constructor (chỉ cho phép tạo thông qua Builder)
     private UserExportBuilder(Builder builder) {
         this.id = builder.id;
         this.username = builder.username;

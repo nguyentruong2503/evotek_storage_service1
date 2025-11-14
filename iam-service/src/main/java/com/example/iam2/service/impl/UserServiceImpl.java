@@ -22,6 +22,8 @@ import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jxls.common.Context;
+import org.jxls.util.JxlsHelper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,6 +72,9 @@ public class UserServiceImpl implements UserService {
 
     @Value("${iam.security.keycloak-enabled:false}")
     private boolean keycloakEnabled;
+
+    @Value("${default.password}")
+    private String defaultPassw;
 
     @Autowired
     private KeycloakService keycloakService;
@@ -147,7 +152,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void resetPassword(Long id) {
         UserEntity userEntity = userRepository.findById(id).get();
-        userEntity.setPassword(passwordEncoder.encode("123456aA@"));
+        userEntity.setPassword(passwordEncoder.encode(defaultPassw));
         userRepository.save(userEntity);
     }
 
@@ -207,7 +212,7 @@ public class UserServiceImpl implements UserService {
         int rowNum = 0;
         for (Row row : sheet) {
             rowNum++;
-            if (rowNum == 1) continue; // skip header
+            if (rowNum == 1) continue; // bỏ qua tiêu đề
 
             UserExcelDTO dto = new UserExcelDTO();
             try {
@@ -245,7 +250,7 @@ public class UserServiceImpl implements UserService {
                 dto.getErrors().add("Lỗi đọc dữ liệu: " + e.getMessage());
             }
 
-            // Validate bắt buộc
+            // Validate
             if (dto.getUsername() == null || dto.getUsername().isEmpty()) {
                 dto.getErrors().add("Username trống");
             }
@@ -308,98 +313,120 @@ public class UserServiceImpl implements UserService {
             if (!dto.getErrors().isEmpty()) continue;
 
             UserDTO userDTO =modelMapper.map(dto,UserDTO.class);
-            userDTO.setPassword("123456");
+            userDTO.setPassword(defaultPassw);
             keycloakService.register(userDTO);
         }
     }
 
+//    @Override
+//    public ByteArrayInputStream exportUsers(UserExportRequest request) throws IOException {
+//        UserExportBuilder builder = userExportBuilderConverter.toUserExportBuilder(request);
+//
+//        List<UserEntity> users = userRepository.importByFilter(builder);
+//
+//        Workbook workbook = new XSSFWorkbook();
+//        Sheet sheet = workbook.createSheet("Users");
+//
+//        Font headerFont = workbook.createFont();
+//        headerFont.setBold(true);
+//        headerFont.setColor(IndexedColors.WHITE.getIndex());
+//        headerFont.setFontName("Times New Roman");
+//
+//        CellStyle headerCellStyle = workbook.createCellStyle();
+//        headerCellStyle.setFont(headerFont);
+//        headerCellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
+//        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+//        headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
+//        headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+//        headerCellStyle.setBorderBottom(BorderStyle.THIN);
+//        headerCellStyle.setBorderTop(BorderStyle.THIN);
+//        headerCellStyle.setBorderRight(BorderStyle.THIN);
+//        headerCellStyle.setBorderLeft(BorderStyle.THIN);
+//
+//        Font dataFont = workbook.createFont();
+//        dataFont.setFontName("Times New Roman");
+//
+//        CellStyle dataStyle = workbook.createCellStyle();
+//        dataStyle.setFont(dataFont);
+//        dataStyle.setWrapText(true);
+//        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+//        dataStyle.setBorderBottom(BorderStyle.THIN);
+//        dataStyle.setBorderTop(BorderStyle.THIN);
+//        dataStyle.setBorderRight(BorderStyle.THIN);
+//        dataStyle.setBorderLeft(BorderStyle.THIN);
+//
+//        String[] headers = {
+//                "STT", "Username", "Email", "First Name", "Last Name", "Date of Birth",
+//                "Phone", "Street", "Ward", "District", "Province", "Years of Experience",
+//                "Locked", "Deleted"
+//        };
+//
+//        Row headerRow = sheet.createRow(0);
+//        for (int i = 0; i < headers.length; i++) {
+//            Cell cell = headerRow.createCell(i);
+//            cell.setCellValue(headers[i]);
+//            cell.setCellStyle(headerCellStyle);
+//        }
+//
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+//        int rowNum = 1;
+//        for (UserEntity user : users) {
+//            Row row = sheet.createRow(rowNum++);
+//
+//            row.createCell(0).setCellValue(rowNum - 1); // STT
+//            row.createCell(1).setCellValue(Optional.ofNullable(user.getUsername()).orElse(""));
+//            row.createCell(2).setCellValue(Optional.ofNullable(user.getEmail()).orElse(""));
+//            row.createCell(3).setCellValue(Optional.ofNullable(user.getFirstName()).orElse(""));
+//            row.createCell(4).setCellValue(Optional.ofNullable(user.getLastName()).orElse(""));
+//            row.createCell(5).setCellValue(
+//                    user.getBirthday() != null ? dateFormat.format(user.getBirthday()) : "");
+//            row.createCell(6).setCellValue(Optional.ofNullable(user.getPhone()).orElse(""));
+//            row.createCell(7).setCellValue(Optional.ofNullable(user.getStreet()).orElse(""));
+//            row.createCell(8).setCellValue(Optional.ofNullable(user.getWard()).orElse(""));
+//            row.createCell(9).setCellValue(Optional.ofNullable(user.getDistrict()).orElse(""));
+//            row.createCell(10).setCellValue(Optional.ofNullable(user.getProvince()).orElse(""));
+//            row.createCell(11).setCellValue(
+//                    user.getYearsOfEx() != null ? user.getYearsOfEx() : 0);
+//            row.createCell(12).setCellValue(
+//                    user.getLocked() != null && user.getLocked() ? "Yes" : "No");
+//            row.createCell(13).setCellValue(
+//                    user.getDeleted() != null && user.getDeleted() ? "Yes" : "No");
+//
+//            for (int i = 0; i < headers.length; i++) {
+//                row.getCell(i).setCellStyle(dataStyle);
+//            }
+//        }
+//        for (int i = 0; i < headers.length; i++) {
+//            sheet.autoSizeColumn(i);
+//        }
+//
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        workbook.write(out);
+//        workbook.close();
+//
+//        return new ByteArrayInputStream(out.toByteArray());
+//    }
+
     @Override
     public ByteArrayInputStream exportUsers(UserExportRequest request) throws IOException {
         UserExportBuilder builder = userExportBuilderConverter.toUserExportBuilder(request);
+        List<UserEntity> users = userRepository.exportByFilter(builder);
+        System.out.println("Export user count = " + users.size());
 
-        List<UserEntity> users = userRepository.importByFilter(builder);
 
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Users");
+        Map<String, Object> beans = new HashMap<>();
+        beans.put("users", users);
+        beans.put("dateFormat", new SimpleDateFormat("dd/MM/yyyy"));
 
-        Font headerFont = workbook.createFont();
-        headerFont.setBold(true);
-        headerFont.setColor(IndexedColors.WHITE.getIndex());
-        headerFont.setFontName("Times New Roman");
+        Context context = new Context(beans);
 
-        CellStyle headerCellStyle = workbook.createCellStyle();
-        headerCellStyle.setFont(headerFont);
-        headerCellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
-        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-        headerCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        headerCellStyle.setBorderBottom(BorderStyle.THIN);
-        headerCellStyle.setBorderTop(BorderStyle.THIN);
-        headerCellStyle.setBorderRight(BorderStyle.THIN);
-        headerCellStyle.setBorderLeft(BorderStyle.THIN);
+        try (InputStream is = getClass().getResourceAsStream("/templates/users_template.xlsx");
+             ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
-        Font dataFont = workbook.createFont();
-        dataFont.setFontName("Times New Roman");
+            JxlsHelper.getInstance().processTemplate(is, os, context);
 
-        CellStyle dataStyle = workbook.createCellStyle();
-        dataStyle.setFont(dataFont);
-        dataStyle.setWrapText(true);
-        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        dataStyle.setBorderBottom(BorderStyle.THIN);
-        dataStyle.setBorderTop(BorderStyle.THIN);
-        dataStyle.setBorderRight(BorderStyle.THIN);
-        dataStyle.setBorderLeft(BorderStyle.THIN);
-
-        String[] headers = {
-                "STT", "Username", "Email", "First Name", "Last Name", "Date of Birth",
-                "Phone", "Street", "Ward", "District", "Province", "Years of Experience",
-                "Locked", "Deleted"
-        };
-
-        Row headerRow = sheet.createRow(0);
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(headers[i]);
-            cell.setCellStyle(headerCellStyle);
+            return new ByteArrayInputStream(os.toByteArray());
         }
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        int rowNum = 1;
-        for (UserEntity user : users) {
-            Row row = sheet.createRow(rowNum++);
-
-            row.createCell(0).setCellValue(rowNum - 1); // STT
-            row.createCell(1).setCellValue(Optional.ofNullable(user.getUsername()).orElse(""));
-            row.createCell(2).setCellValue(Optional.ofNullable(user.getEmail()).orElse(""));
-            row.createCell(3).setCellValue(Optional.ofNullable(user.getFirstName()).orElse(""));
-            row.createCell(4).setCellValue(Optional.ofNullable(user.getLastName()).orElse(""));
-            row.createCell(5).setCellValue(
-                    user.getBirthday() != null ? dateFormat.format(user.getBirthday()) : "");
-            row.createCell(6).setCellValue(Optional.ofNullable(user.getPhone()).orElse(""));
-            row.createCell(7).setCellValue(Optional.ofNullable(user.getStreet()).orElse(""));
-            row.createCell(8).setCellValue(Optional.ofNullable(user.getWard()).orElse(""));
-            row.createCell(9).setCellValue(Optional.ofNullable(user.getDistrict()).orElse(""));
-            row.createCell(10).setCellValue(Optional.ofNullable(user.getProvince()).orElse(""));
-            row.createCell(11).setCellValue(
-                    user.getYearsOfEx() != null ? user.getYearsOfEx() : 0);
-            row.createCell(12).setCellValue(
-                    user.getLocked() != null && user.getLocked() ? "Yes" : "No");
-            row.createCell(13).setCellValue(
-                    user.getDeleted() != null && user.getDeleted() ? "Yes" : "No");
-
-            for (int i = 0; i < headers.length; i++) {
-                row.getCell(i).setCellStyle(dataStyle);
-            }
-        }
-        for (int i = 0; i < headers.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        workbook.write(out);
-        workbook.close();
-
-        return new ByteArrayInputStream(out.toByteArray());
     }
 
 }
