@@ -1,8 +1,10 @@
 package com.example.iam2.controller;
 
+import com.example.iam2.model.dto.PasswordDTO;
 import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.response.LoginResponse;
 import com.example.iam2.service.KeycloakService;
+import com.example.iam2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,9 @@ public class KeyCloakController {
 
     @Autowired
     private KeycloakService keycloakService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
@@ -53,6 +58,19 @@ public class KeyCloakController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassW(@RequestHeader("Authorization") String authToken,
+                                         @RequestBody PasswordDTO passwordDTO){
+        String token = authToken.replace("Bearer ", "");
+        userService.changePassword(token,passwordDTO);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "status", "success",
+                        "message", "Đổi mật khẩu thành công!"
+                ));
     }
 
 }

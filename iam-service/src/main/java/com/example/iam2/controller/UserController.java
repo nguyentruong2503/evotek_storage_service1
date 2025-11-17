@@ -1,6 +1,7 @@
 package com.example.iam2.controller;
 
 import com.example.iam2.model.dto.AssignRoleDTO;
+import com.example.iam2.model.dto.PasswordDTO;
 import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.request.UserExcelDTO;
 import com.example.iam2.model.request.UserExportRequest;
@@ -107,7 +108,6 @@ public class UserController {
         return userService.searchUsers(request, page, size);
     }
 
-
     @GetMapping("/profile/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public UserDetail profile(@PathVariable Long id) {
@@ -164,5 +164,4 @@ public class UserController {
                     .body(("Lỗi xuất file: " + e.getMessage()).getBytes());
         }
     }
-
 }

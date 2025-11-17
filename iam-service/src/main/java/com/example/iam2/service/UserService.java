@@ -2,6 +2,7 @@ package com.example.iam2.service;
 
 import com.example.iam2.builder.UserBuilder;
 import com.example.iam2.model.dto.AssignRoleDTO;
+import com.example.iam2.model.dto.PasswordDTO;
 import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.request.UserExcelDTO;
 import com.example.iam2.model.request.UserExportRequest;
@@ -27,6 +28,8 @@ public interface UserService {
     void deleteUser(Long id);
 
     void resetPassword(Long id);
+
+    void changePassword(String token, PasswordDTO passwordDTO);
 
     Page<UserDTO> searchUsers(UserExportRequest request, int page, int size);
 

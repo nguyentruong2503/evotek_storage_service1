@@ -9,6 +9,7 @@ import com.example.iam2.exception.DuplicateException;
 import com.example.iam2.exception.InvalidTokenException;
 import com.example.iam2.exception.NotFoundException;
 import com.example.iam2.model.dto.AssignRoleDTO;
+import com.example.iam2.model.dto.PasswordDTO;
 import com.example.iam2.model.dto.RoleDTO;
 import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.request.UserExcelDTO;
@@ -17,6 +18,7 @@ import com.example.iam2.model.response.UserDetail;
 import com.example.iam2.model.response.UserProfile;
 import com.example.iam2.repository.RoleRepository;
 import com.example.iam2.repository.UserRepository;
+import com.example.iam2.service.KeycloakClientCredentialsService;
 import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
 import com.example.iam2.specification.UserSpecification;
@@ -30,12 +32,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -77,8 +85,26 @@ public class UserServiceImpl implements UserService {
     @Value("${default.password}")
     private String defaultPassw;
 
+    @Value("${keycloak.token-uri}")
+    private String tokenUri;
+
+    @Value("${keycloak.admin.client-id}")
+    private String clientId;
+
+    @Value("${keycloak.admin.client-secret}")
+    private String clientSecret;
+
+    @Value("${keycloak.server-url}")
+    private String keycloakServer;
+
+    @Value("${keycloak.realm}")
+    private String realms;
+
     @Autowired
     private KeycloakService keycloakService;
+
+    @Autowired
+    private KeycloakClientCredentialsService keycloakClientCredentialsService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -158,6 +184,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void changePassword(String token, PasswordDTO passwordDTO) {
+
+        String username = keycloakJwtDecoder.decode(token).getClaimAsString("preferred_username");
+        String userId = keycloakJwtDecoder.decode(token).getClaimAsString("sub");
+
+        boolean checkOldPass = validateOldPassword(username,passwordDTO.getCurrentPassword());
+        if(!checkOldPass){
+            throw new RuntimeException("Mật khẩu hiện tại không đúng");
+        }
+
+        resetPasswordByAdmin(userId,passwordDTO.getNewPassword());
+    }
+
+    @Override
     public Page<UserDTO> searchUsers(UserExportRequest request, int page, int size) {
         UserBuilder builder = userBuilderConverter.toUserBuilder(request, request.getRoles());
         Specification<UserEntity> spec = UserSpecification.filter(builder);
@@ -210,7 +250,7 @@ public class UserServiceImpl implements UserService {
         int rowNum = 0;
         for (Row row : sheet) {
             rowNum++;
-            if (rowNum == 1) continue; // bỏ qua tiêu đề
+            if (rowNum == 1) continue;
 
             UserExcelDTO dto = new UserExcelDTO();
             try {
@@ -336,4 +376,57 @@ public class UserServiceImpl implements UserService {
             return new ByteArrayInputStream(os.toByteArray());
         }
     }
+
+    public boolean validateOldPassword(String username, String oldPassword) {
+        String url = tokenUri;
+        RestTemplate restTemplate = new RestTemplate();
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "password");
+        body.add("client_id", clientId);
+        body.add("client_secret", clientSecret);
+        body.add("username", username);
+        body.add("password", oldPassword);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<?> request = new HttpEntity<>(body, headers);
+
+        try {
+            Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
+            if (response != null && response.get("access_token") != null) {
+                System.out.println(response);
+                return true;
+            }
+            return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    private void resetPasswordByAdmin(String userId, String newPassword) {
+        String adminToken = keycloakClientCredentialsService.getAccessToken();
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        Map<String, Object> payload = Map.of(
+                "type", "password",
+                "value", newPassword,
+                "temporary", false
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(adminToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+
+        restTemplate.put(
+                keycloakServer + "/admin/realms/"+ realms + "/users/" + userId + "/reset-password",
+                request
+        );
+    }
+
 }

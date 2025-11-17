@@ -13,7 +13,6 @@ public class IamController {
     @Autowired
     private IamService iamService;
 
-
     // Validate Keycloak token, trả về role/permission
     @GetMapping("/validate")
     public ResponseEntity<UserPermissionResponse> validateToken(
