@@ -44,6 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -105,6 +107,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private KeycloakClientCredentialsService keycloakClientCredentialsService;
+
+    @Autowired
+    private WebClient webClient;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -378,29 +383,26 @@ public class UserServiceImpl implements UserService {
     }
 
     public boolean validateOldPassword(String username, String oldPassword) {
-        String url = tokenUri;
-        RestTemplate restTemplate = new RestTemplate();
-
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "password");
-        body.add("client_id", clientId);
-        body.add("client_secret", clientSecret);
-        body.add("username", username);
-        body.add("password", oldPassword);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        HttpEntity<?> request = new HttpEntity<>(body, headers);
-
         try {
-            Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
-            if (response != null && response.get("access_token") != null) {
-                System.out.println(response);
+            Map<String,Object> response = webClient.post()
+                    .uri(tokenUri)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters.fromFormData("grant_type","password")
+                            .with("client_id", clientId)
+                            .with("client_secret", clientSecret)
+                            .with("username", username)
+                            .with("password", oldPassword)
+                    )
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            if(response != null && response.get("access_token") != null){
                 return true;
             }
+
             return false;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex){
             ex.printStackTrace();
             return false;
         }
@@ -409,24 +411,21 @@ public class UserServiceImpl implements UserService {
     private void resetPasswordByAdmin(String userId, String newPassword) {
         String adminToken = keycloakClientCredentialsService.getAccessToken();
 
-        RestTemplate restTemplate = new RestTemplate();
-
         Map<String, Object> payload = Map.of(
                 "type", "password",
                 "value", newPassword,
                 "temporary", false
         );
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(adminToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        webClient.put()
+                .uri(keycloakServer + "/admin/realms/" + realms + "/users/" + userId + "/reset-password")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-
-        restTemplate.put(
-                keycloakServer + "/admin/realms/"+ realms + "/users/" + userId + "/reset-password",
-                request
-        );
     }
 
 }

@@ -13,7 +13,7 @@ import java.util.List;
 public interface FileService {
     Page<FileDTO> getAll(FileSearchRequest fileSearchRequest, int page, int size);
 
-    List<FileDTO> uploadMultipleFiles(MultipartFile[] files, Boolean isPublic,Long ownerID);
+    List<FileDTO> uploadMultipleFiles(MultipartFile[] files, Boolean isPublic,Long ownerID) throws Exception;
 
     FileDTO getFileById(Long id);
 

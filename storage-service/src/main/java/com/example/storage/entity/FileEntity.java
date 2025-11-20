@@ -42,4 +42,7 @@ public class FileEntity {
 
     @Column(name = "deleted" ,nullable = false)
     private boolean deleted = false;
+
+    @Column(name = "hash", nullable = false)
+    private String hash;
 }

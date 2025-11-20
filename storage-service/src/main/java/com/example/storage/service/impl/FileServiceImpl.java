@@ -16,6 +16,7 @@ import com.example.storage.service.CloudinaryService;
 import com.example.storage.service.FileService;
 import com.example.storage.specification.FileSpecification;
 import com.example.storage.util.CloudinaryUtils;
+import com.example.storage.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,10 +60,17 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<FileDTO> uploadMultipleFiles(MultipartFile[] files, Boolean isPublic,Long ownerID) {
+    public List<FileDTO> uploadMultipleFiles(MultipartFile[] files, Boolean isPublic,Long ownerID) throws Exception {
         List<FileDTO> results = new ArrayList<>();
 
         for (MultipartFile file : files) {
+
+            String hash = FileUtils.md5Hash(file);
+            if (fileRepository.existsByHash(hash)) {
+                System.out.println("File " + file.getOriginalFilename() + " đã tồn tại");
+                continue; // bỏ qua file trùng
+            }
+
             Map<String, Object> uploadResult = cloudinaryService.uploadFile(file);
 
             FileEntity entity = new FileEntity();
@@ -73,6 +81,7 @@ public class FileServiceImpl implements FileService {
             entity.setIs_public(isPublic);
             entity.setCreatedAt(LocalDateTime.now());
             entity.setOwner_id(ownerID);
+            entity.setHash(hash);
 
             FileEntity saved = fileRepository.save(entity);
             results.add(fileConverter.toFileDTO(saved));

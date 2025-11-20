@@ -9,6 +9,7 @@ import com.example.iam2.repository.UserRepository;
 import com.example.iam2.service.IamService;
 import com.example.iam2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -34,11 +35,14 @@ public class IamServiceImpl implements IamService {
     @Autowired
     private UserConverter userConverter;
 
+    @Value("${app.jwk-set-uri}")
+    private String jwkSetUri;
+
     @Override
     public UserPermissionResponse validateToken(String token) {
         // Decode JWT từ Keycloak
         Jwt jwt = NimbusJwtDecoder
-                .withJwkSetUri("http://localhost:8080/realms/IAM2/protocol/openid-connect/certs")
+                .withJwkSetUri(jwkSetUri)
                 .build()
                 .decode(token);
 
@@ -71,7 +75,7 @@ public class IamServiceImpl implements IamService {
     @Override
     public UserDTO getUserByToken(String token) {
         Jwt jwt = NimbusJwtDecoder
-                .withJwkSetUri("http://localhost:8080/realms/IAM2/protocol/openid-connect/certs")
+                .withJwkSetUri(jwkSetUri)
                 .build()
                 .decode(token);
 

@@ -27,7 +27,7 @@ public class FileController {
     @PostMapping("/public/upload")
     public ResponseEntity<List<FileDTO>> uploadPublicFiles(
             @RequestParam("files") MultipartFile[] files,
-            @RequestParam("owner_id") Long ownerId) {
+            @RequestParam("owner_id") Long ownerId) throws Exception {
         List<FileDTO> result = fileService.uploadMultipleFiles(files, true,ownerId);
         return ResponseEntity.ok(result);
     }
@@ -65,7 +65,7 @@ public class FileController {
     @PreAuthorize("hasAuthority('FILE_UPLOAD')")
     public ResponseEntity<List<FileDTO>> uploadPrivateFiles(
             @RequestParam("files") MultipartFile[] files,
-            @RequestParam("owner_id") Long ownerId) {
+            @RequestParam("owner_id") Long ownerId) throws Exception {
         List<FileDTO> result = fileService.uploadMultipleFiles(files, false,ownerId);
         return ResponseEntity.ok(result);
     }

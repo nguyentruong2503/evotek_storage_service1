@@ -15,10 +15,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 
@@ -34,9 +32,6 @@ public class SecurityConfig {
 
     @Value("${iam.security.keycloak-enabled:false}")
     private boolean keycloakEnabled;
-
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String keycloakIssuerUri;
 
     @Autowired
     private KeycloakAuthorityConverter keycloakAuthorityConverter;
