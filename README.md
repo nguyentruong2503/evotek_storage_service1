@@ -84,3 +84,7 @@ Danh sách file:
 - Các API tuân thủ quy tắc Restful API
 
 
+Sử dụng Feign Client để giao tiếp giữa 2 service. Cấu hình Gateway để nhận request từ client rồi điều hướng đến đúng service.
+Dùng Eureka để đăng ký các service, không phải sử dụng port để call nhau.
+
+
