@@ -2,7 +2,7 @@ package com.example.iam2.converter;
 
 import com.example.iam2.builder.UserBuilder;
 import com.example.iam2.model.request.UserExportRequest;
-import com.example.iam2.util.MapUtils;
+import com.example.common.util.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;

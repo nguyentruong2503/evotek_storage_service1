@@ -1,17 +1,15 @@
 package com.example.iam2.controller;
 
 import com.example.iam2.model.dto.AssignPermissionDTO;
-import com.example.iam2.model.dto.AssignRoleDTO;
 import com.example.iam2.model.dto.PermissionDTO;
-import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.service.PermissionService;
+import com.example.common.model.response.PagedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController

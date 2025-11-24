@@ -1,8 +1,8 @@
 package com.example.iam2.service;
 
 
-import com.example.iam2.model.dto.RoleDTO;
-import com.example.iam2.model.response.PagedResponse;
+import com.example.common.model.dto.RoleDTO;
+import com.example.common.model.response.PagedResponse;
 
 public interface RoleService {
     RoleDTO createRole(RoleDTO roleDTO);

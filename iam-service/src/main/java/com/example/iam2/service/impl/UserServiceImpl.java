@@ -1,17 +1,15 @@
 package com.example.iam2.service.impl;
 
+import com.example.common.exception.DuplicateException;
+import com.example.common.exception.InvalidTokenException;
+import com.example.common.exception.NotFoundException;
 import com.example.iam2.builder.UserBuilder;
 import com.example.iam2.converter.UserConverter;
 import com.example.iam2.converter.UserBuilderConverter;
 import com.example.iam2.entity.RoleEntity;
 import com.example.iam2.entity.UserEntity;
-import com.example.iam2.exception.DuplicateException;
-import com.example.iam2.exception.InvalidTokenException;
-import com.example.iam2.exception.NotFoundException;
 import com.example.iam2.model.dto.AssignRoleDTO;
 import com.example.iam2.model.dto.PasswordDTO;
-import com.example.iam2.model.dto.RoleDTO;
-import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.request.UserExcelDTO;
 import com.example.iam2.model.request.UserExportRequest;
 import com.example.iam2.model.response.UserDetail;
@@ -22,6 +20,8 @@ import com.example.iam2.service.KeycloakClientCredentialsService;
 import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
 import com.example.iam2.specification.UserSpecification;
+import com.example.common.model.dto.RoleDTO;
+import com.example.common.model.dto.UserDTO;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jxls.common.Context;
@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,9 +40,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -199,7 +195,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Mật khẩu hiện tại không đúng");
         }
 
-        resetPasswordByAdmin(userId,passwordDTO.getNewPassword());
+        changePasswordKeycloak(userId,passwordDTO.getNewPassword());
     }
 
     @Override
@@ -408,8 +404,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void resetPasswordByAdmin(String userId, String newPassword) {
+    private void changePasswordKeycloak(String userId, String newPassword) {
         String adminToken = keycloakClientCredentialsService.getAccessToken();
+        System.out.println("Test: " + adminToken);
 
         Map<String, Object> payload = Map.of(
                 "type", "password",

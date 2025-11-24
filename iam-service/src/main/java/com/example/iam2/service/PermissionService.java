@@ -1,11 +1,8 @@
 package com.example.iam2.service;
 
 import com.example.iam2.model.dto.AssignPermissionDTO;
-import com.example.iam2.model.dto.AssignRoleDTO;
 import com.example.iam2.model.dto.PermissionDTO;
-import com.example.iam2.model.response.PagedResponse;
-
-import java.util.List;
+import com.example.common.model.response.PagedResponse;
 
 public interface PermissionService {
     PermissionDTO createPermission(PermissionDTO permissionDTO);

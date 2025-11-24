@@ -1,7 +1,7 @@
 package com.example.storage.converter;
 
+import com.example.common.model.dto.FileDTO;
 import com.example.storage.entity.FileEntity;
-import com.example.storage.model.dto.FileDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

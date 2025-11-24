@@ -1,13 +1,10 @@
 package com.example.iam2.controller;
 
-import com.example.iam2.client.StorageServiceClient;
-import com.example.iam2.model.dto.FileDTO;
-import com.example.iam2.model.request.FileSearchRequest;
-import com.example.iam2.model.request.UpdateFileRequest;
-import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.service.StorageProxyService;
+import com.example.common.model.dto.FileDTO;
+import com.example.common.model.request.FileSearchRequest;
+import com.example.common.model.request.UpdateFileRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,7 +81,6 @@ public class FileProxyController {
 
     @PutMapping("/{id}")
     public FileDTO updateFile(@PathVariable Long id, @RequestBody UpdateFileRequest request) {
-
         return storageProxyService.updateFile(request, id);
     }
 

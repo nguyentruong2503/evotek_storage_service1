@@ -1,7 +1,6 @@
 package com.example.iam2.security;
 
-import com.example.iam2.model.dto.UserDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.common.model.dto.UserDTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

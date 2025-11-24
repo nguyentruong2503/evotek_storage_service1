@@ -1,8 +1,7 @@
 package com.example.iam2.service.impl;
 
-import com.example.iam2.exception.InvalidTokenException;
+import com.example.common.exception.InvalidTokenException;
 import com.example.iam2.model.JwtInfo;
-import com.example.iam2.model.RedisToken;
 import com.example.iam2.model.TokenPayload;
 import com.example.iam2.repository.RedisTokenRepository;
 import com.example.iam2.security.CustomUserDetails;

@@ -1,21 +1,17 @@
 package com.example.iam2.service.impl;
 
-import com.example.iam2.entity.PermissionEntity;
 import com.example.iam2.entity.RoleEntity;
-import com.example.iam2.exception.DuplicateException;
-import com.example.iam2.exception.NotFoundException;
-import com.example.iam2.model.dto.PermissionDTO;
-import com.example.iam2.model.dto.RoleDTO;
-import com.example.iam2.model.response.PagedResponse;
+import com.example.common.exception.*;
 import com.example.iam2.repository.RoleRepository;
 import com.example.iam2.service.RoleService;
+import com.example.common.model.dto.RoleDTO;
+import com.example.common.model.response.PagedResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class RoleServiceImpl implements RoleService {

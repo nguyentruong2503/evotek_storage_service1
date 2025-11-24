@@ -99,13 +99,25 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-webflux</artifactId>
     </dependency>
-      <dependency>
-          <groupId>com.example</groupId>
-          <artifactId>iam-service</artifactId>
-          <version>1.0.0</version>
-          <scope>compile</scope>
-      </dependency>
 
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>iam-service</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+    </dependency>
+
+<!--    thêm common-->
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>common</artifactId>
+      <version>1.0.0</version>
+    </dependency>
 
   </dependencies>
 

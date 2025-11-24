@@ -1,6 +1,6 @@
 package com.example.iam2.model.response;
 
-import com.example.iam2.model.dto.RoleDTO;
+import com.example.common.model.dto.RoleDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;

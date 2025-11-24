@@ -1,17 +1,16 @@
 package com.example.iam2.service.impl;
 
+import com.example.common.exception.NotFoundException;
 import com.example.iam2.converter.UserConverter;
 import com.example.iam2.entity.UserEntity;
-import com.example.iam2.exception.NotFoundException;
-import com.example.iam2.model.dto.UserDTO;
-import com.example.iam2.model.response.UserPermissionResponse;
 import com.example.iam2.repository.UserRepository;
 import com.example.iam2.service.IamService;
 import com.example.iam2.service.UserService;
+import com.example.common.model.dto.UserDTO;
+import com.example.common.model.response.UserPermissionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;

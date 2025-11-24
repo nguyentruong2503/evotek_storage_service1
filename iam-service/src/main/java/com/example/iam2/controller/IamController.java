@@ -1,8 +1,8 @@
 package com.example.iam2.controller;
 
-import com.example.iam2.model.dto.UserDTO;
-import com.example.iam2.model.response.UserPermissionResponse;
 import com.example.iam2.service.IamService;
+import com.example.common.model.dto.UserDTO;
+import com.example.common.model.response.UserPermissionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

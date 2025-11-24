@@ -2,11 +2,11 @@ package com.example.iam2.service.impl;
 
 import com.example.iam2.entity.RoleEntity;
 import com.example.iam2.entity.UserEntity;
-import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.response.LoginResponse;
 import com.example.iam2.repository.RoleRepository;
 import com.example.iam2.repository.UserRepository;
 import com.example.iam2.service.KeycloakService;
+import com.example.common.model.dto.UserDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

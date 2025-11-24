@@ -23,5 +23,4 @@ public class UserExportRequest {
     private Boolean locked;
     private Boolean deleted;
     private List<String> roles;
-
 }

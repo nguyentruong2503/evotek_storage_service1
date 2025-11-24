@@ -1,8 +1,8 @@
 package com.example.storage.converter;
 
+import com.example.common.model.request.FileSearchRequest;
 import com.example.storage.builder.FileSearchBuilder;
-import com.example.storage.model.request.FileSearchRequest;
-import com.example.storage.util.MapUtils;
+import com.example.common.util.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;

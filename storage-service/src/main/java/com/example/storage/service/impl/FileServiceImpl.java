@@ -1,16 +1,13 @@
 package com.example.storage.service.impl;
 
-import com.example.iam2.entity.UserEntity;
-import com.example.iam2.specification.UserSpecification;
+import com.example.common.model.dto.FileDTO;
+import com.example.common.model.request.FileSearchRequest;
+import com.example.common.model.request.UpdateFileRequest;
 import com.example.storage.builder.FileSearchBuilder;
 import com.example.storage.converter.FileConverter;
 import com.example.storage.converter.FileSearchBuilderConverter;
 import com.example.storage.entity.FileEntity;
-import com.example.storage.exception.NotFoundException;
-import com.example.storage.model.dto.FileDTO;
-import com.example.storage.model.request.FileSearchRequest;
-import com.example.storage.model.request.UpdateFileRequest;
-import com.example.storage.model.response.PagedResponse;
+import com.example.common.exception.*;
 import com.example.storage.repository.FileRepository;
 import com.example.storage.service.CloudinaryService;
 import com.example.storage.service.FileService;
@@ -25,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;

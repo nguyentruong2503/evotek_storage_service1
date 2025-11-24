@@ -1,14 +1,12 @@
 package com.example.iam2.controller;
 
 import com.example.iam2.model.dto.AssignRoleDTO;
-import com.example.iam2.model.dto.PasswordDTO;
-import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.request.UserExcelDTO;
 import com.example.iam2.model.request.UserExportRequest;
-import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.model.response.UserDetail;
 import com.example.iam2.model.response.UserProfile;
 import com.example.iam2.service.UserService;
+import com.example.common.model.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;

@@ -1,8 +1,8 @@
 package com.example.storage.controller;
 
-import com.example.storage.model.dto.FileDTO;
-import com.example.storage.model.request.FileSearchRequest;
-import com.example.storage.model.request.UpdateFileRequest;
+import com.example.common.model.dto.FileDTO;
+import com.example.common.model.request.FileSearchRequest;
+import com.example.common.model.request.UpdateFileRequest;
 import com.example.storage.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

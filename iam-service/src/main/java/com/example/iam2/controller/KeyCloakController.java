@@ -1,10 +1,10 @@
 package com.example.iam2.controller;
 
 import com.example.iam2.model.dto.PasswordDTO;
-import com.example.iam2.model.dto.UserDTO;
 import com.example.iam2.model.response.LoginResponse;
 import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
+import com.example.common.model.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

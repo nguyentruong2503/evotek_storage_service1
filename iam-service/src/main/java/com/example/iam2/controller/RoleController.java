@@ -1,9 +1,8 @@
 package com.example.iam2.controller;
 
-import com.example.iam2.model.dto.PermissionDTO;
-import com.example.iam2.model.dto.RoleDTO;
-import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.service.RoleService;
+import com.example.common.model.dto.RoleDTO;
+import com.example.common.model.response.PagedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +52,7 @@ public class RoleController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public PagedResponse<RoleDTO> getAll(@RequestParam(defaultValue = "1") int page,
-                                               @RequestParam(defaultValue = "5") int size) {
+                                         @RequestParam(defaultValue = "5") int size) {
         return roleService.getAll(page,size);
     }
 

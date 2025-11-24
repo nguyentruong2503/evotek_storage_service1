@@ -1,18 +1,16 @@
 package com.example.iam2.service;
 
+import com.example.common.exception.NotFoundException;
 import com.example.iam2.client.StorageServiceClient;
 import com.example.iam2.entity.UserEntity;
-import com.example.iam2.exception.NotFoundException;
-import com.example.iam2.model.dto.FileDTO;
-import com.example.iam2.model.dto.UserDTO;
-import com.example.iam2.model.request.FileSearchRequest;
-import com.example.iam2.model.request.UpdateFileRequest;
-import com.example.iam2.model.response.PagedResponse;
 import com.example.iam2.repository.UserRepository;
+import com.example.common.model.dto.FileDTO;
+import com.example.common.model.dto.UserDTO;
+import com.example.common.model.request.FileSearchRequest;
+import com.example.common.model.request.UpdateFileRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -99,7 +97,7 @@ public class StorageProxyService {
         return storageServiceClient.searchFiles(req, page, size);
     }
 
-    public FileDTO updateFile(UpdateFileRequest updateFileRequest,Long id){
+    public FileDTO updateFile(UpdateFileRequest updateFileRequest, Long id){
         return storageServiceClient.updateFile(id,updateFileRequest);
     }
 
