@@ -14,7 +14,6 @@ import java.util.List;
 
 @FeignClient(
         name = "storage-service",
-        url = "${storage.service.url}",
         configuration = FeignConfig.class
 )
 public interface StorageServiceClient {

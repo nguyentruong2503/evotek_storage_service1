@@ -9,6 +9,7 @@ import com.example.storage.converter.FileSearchBuilderConverter;
 import com.example.storage.entity.FileEntity;
 import com.example.common.exception.*;
 import com.example.storage.repository.FileRepository;
+import com.example.storage.service.CacheService;
 import com.example.storage.service.CloudinaryService;
 import com.example.storage.service.FileService;
 import com.example.storage.specification.FileSpecification;
@@ -46,6 +47,9 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private CacheService cacheService;
 
     @Override
     public Page<FileDTO> getAll(FileSearchRequest fileSearchRequest, int page, int size) {
@@ -95,18 +99,32 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileDTO getPublicFile(Long id) throws AccessDeniedException {
+        String key = "file:public:" + id;
+        FileDTO cachedFile = cacheService.get(key,FileDTO.class);
+        if(cachedFile !=null){
+            System.out.println(">>> CACHE HIT " + key);
+            return cachedFile;
+        }
         FileEntity fileEntity = fileRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("File không tồn tại"));
 
         if(fileEntity.getIs_public()){
-            return fileConverter.toFileDTO(fileEntity);        }
-
+            FileDTO fileDTO = fileConverter.toFileDTO(fileEntity);
+            cacheService.set(key,fileDTO,180L);
+            return fileDTO;
+        }
         throw new AccessDeniedException("Bạn không có quyền xem file này");
-
     }
 
     @Override
     public String getPrivateViewUrl(Long id, Integer width, Integer height, Double ratio,Long ownerID) throws AccessDeniedException {
+        String key = "file:private:" + id;
+        FileDTO cachedFile = cacheService.get(key,FileDTO.class);
+        if(cachedFile !=null){
+            System.out.println(">>> CACHE HIT " + key);
+            return CloudinaryUtils.buildCloudinaryUrl(cachedFile.getUrl(), width, height, ratio);
+        }
+
         FileEntity file = fileRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("File không tồn tại"));
 
@@ -116,6 +134,8 @@ public class FileServiceImpl implements FileService {
         }
 
         if(!file.getIs_public()){
+            FileDTO fileDTO = fileConverter.toFileDTO(file);
+            cacheService.set(key,fileDTO,180L);
             return CloudinaryUtils.buildCloudinaryUrl(file.getUrl(), width, height, ratio);
         }
 
@@ -124,6 +144,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String getPublicViewUrl(Long id, Integer width, Integer height, Double ratio) throws AccessDeniedException {
+        String key = "file:public:" + id;
+        FileDTO cachedFile = cacheService.get(key,FileDTO.class);
+        if(cachedFile !=null){
+            System.out.println(">>> CACHE HIT " + key);
+            return CloudinaryUtils.buildCloudinaryUrl(cachedFile.getUrl(), width, height, ratio);
+        }
+
         FileEntity file = fileRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("File không tồn tại"));
 
@@ -133,6 +160,8 @@ public class FileServiceImpl implements FileService {
         }
 
         if(file.getIs_public()){
+            FileDTO fileDTO = fileConverter.toFileDTO(file);
+            cacheService.set(key,fileDTO,180L);
             return CloudinaryUtils.buildCloudinaryUrl(file.getUrl(), width, height, ratio);
         }
 
@@ -145,6 +174,7 @@ public class FileServiceImpl implements FileService {
                 .orElseThrow(() -> new NotFoundException("File không tồn tại"));
         file.setDeleted(true);
         fileRepository.save(file);
+        deleteFileCache(id);
     }
 
     @Override
@@ -158,6 +188,7 @@ public class FileServiceImpl implements FileService {
         file.setUpdatedAt(LocalDateTime.now());
 
         FileEntity saved = fileRepository.save(file);
+        deleteFileCache(id);
         return fileConverter.toFileDTO(saved);
     }
 
@@ -171,5 +202,12 @@ public class FileServiceImpl implements FileService {
         } catch (IOException e) {
             throw new RuntimeException("Lỗi khi tải file từ URL", e);
         }
+    }
+
+    private void deleteFileCache(Long id){
+        String key = "file:public" + id;
+        String key2 = "file:private" + id;
+        cacheService.delete(key);
+        cacheService.delete(key2);
     }
 }

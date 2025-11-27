@@ -1,5 +1,8 @@
-package com.example.iam2.config;
+package com.example.storage.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -25,17 +28,28 @@ public class RedisConfig {
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(redisHost, redisPort));
     }
 
+    //Cấu hình để Jackson hỗ trợ Date/Time
+    @Bean
+    public ObjectMapper redisObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        return objectMapper;
+    }
+
     //redis hiểu nhị phân, nếu lưu 1 object vào thì nó sẽ có định dạng nhị phân
     // => cấu hình để thành JSON
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory){
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory,
+                                                       ObjectMapper redisObjectMapper){
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
         template.setValueSerializer(serializer);
         template.setHashValueSerializer(serializer);
         template.afterPropertiesSet();

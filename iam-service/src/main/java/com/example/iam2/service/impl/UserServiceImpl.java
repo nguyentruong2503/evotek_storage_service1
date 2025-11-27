@@ -16,6 +16,7 @@ import com.example.iam2.model.response.UserDetail;
 import com.example.iam2.model.response.UserProfile;
 import com.example.iam2.repository.RoleRepository;
 import com.example.iam2.repository.UserRepository;
+import com.example.iam2.service.CacheService;
 import com.example.iam2.service.KeycloakClientCredentialsService;
 import com.example.iam2.service.KeycloakService;
 import com.example.iam2.service.UserService;
@@ -111,6 +112,9 @@ public class UserServiceImpl implements UserService {
 
     private final DateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public UserDTO create(UserDTO userDTO) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
@@ -135,32 +139,51 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserProfile findUserById(String token) {
-        Long userIdFromToken;
-
         try {
+            String username;
+            Long userId = null;
+
             if (keycloakEnabled) {
-                // decode token Keycloak, lấy preferred_username, xuống DB để lấy thông tin
-                String username = keycloakJwtDecoder.decode(token).getClaimAsString("preferred_username");
-                UserEntity userEntity = userRepository.findByUsernameAndLockedAndDeleted(username, false, false)
-                        .orElseThrow(() -> new NotFoundException("Không tìm thấy user"));
-                return modelMapper.map(userEntity,UserProfile.class);
+                username = keycloakJwtDecoder.decode(token).getClaimAsString("preferred_username");
             } else {
-                // decode token jwt
-                userIdFromToken = jwtService.getUserIdFromToken(token);
-                UserEntity userEntity = userRepository.findById(userIdFromToken)
+                userId = jwtService.getUserIdFromToken(token);
+                username = userRepository.findById(userId)
+                        .map(UserEntity::getUsername)
                         .orElseThrow(() -> new NotFoundException("Không tìm thấy user"));
-                return modelMapper.map(userEntity,UserProfile.class);
             }
+
+            String cacheKey = "user:" + username; // key cache
+
+            // Kiểm tra cache
+            UserProfile cachedProfile = cacheService.get(cacheKey, UserProfile.class);
+            if (cachedProfile != null) {
+                System.out.println(">>> CACHE HIT " + cacheKey);
+                return cachedProfile;
+            }
+
+            //Nếu không có trong cache thì xuống DB
+            UserEntity userEntity = userRepository.findByUsernameAndLockedAndDeleted(username, false, false)
+                    .orElseThrow(() -> new NotFoundException("Không tìm thấy user"));
+
+            UserProfile profile = modelMapper.map(userEntity, UserProfile.class);
+
+            //Lưu cache
+            cacheService.set(cacheKey, profile, 120L);
+
+            return profile;
+
         } catch (ParseException e) {
             throw new InvalidTokenException("Token không hợp lệ");
         }
     }
+
 
     @Override
     public void lockUser(Long id) {
         UserEntity userEntity = userRepository.findById(id).get();
         userEntity.setLocked(true);
         userRepository.save(userEntity);
+        deleteUserCache(id.toString());
     }
 
     @Override
@@ -168,6 +191,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findById(id).get();
         userEntity.setLocked(false);
         userRepository.save(userEntity);
+        deleteUserCache(id.toString());
     }
 
     @Override
@@ -175,6 +199,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findById(id).get();
         userEntity.setDeleted(true);
         userRepository.save(userEntity);
+        deleteUserCache(id.toString());
     }
 
     @Override
@@ -182,6 +207,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findById(id).get();
         userEntity.setPassword(passwordEncoder.encode(defaultPassw));
         userRepository.save(userEntity);
+        deleteUserCache(id.toString());
     }
 
     @Override
@@ -208,6 +234,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetail userDetail(Long id) {
+
+        String cacheKey = "user:" + id;
+        UserDetail cachedDetail = cacheService.get(cacheKey, UserDetail.class);
+        if (cachedDetail != null) {
+            System.out.println(">>> CACHE HIT " + cacheKey);
+            return cachedDetail;
+        }
+
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User không tồn tại"));
         UserDetail userDetail = modelMapper.map(userEntity, UserDetail.class);
@@ -215,6 +249,8 @@ public class UserServiceImpl implements UserService {
                 .map(role -> modelMapper.map(role, RoleDTO.class))
                 .collect(Collectors.toList());
         userDetail.setRoles(roleDTOs);
+
+        cacheService.set(cacheKey, userDetail, 120L);
         return userDetail;
     }
 
@@ -423,6 +459,12 @@ public class UserServiceImpl implements UserService {
                 .toBodilessEntity()
                 .block();
 
+    }
+
+    //hàm xóa cache khi thay đổi thông tin user
+    private void deleteUserCache(String s){
+        String key = "user:" + s;
+        cacheService.delete(key);
     }
 
 }
