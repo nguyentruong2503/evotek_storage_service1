@@ -41,7 +41,6 @@ public class UserController {
                 ));
     }
 
-
     @GetMapping("/me")
     public UserProfile getMyProfile(@RequestHeader("Authorization") String authToken) {
         String token = authToken.replace("Bearer ", "");
