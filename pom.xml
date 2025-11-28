@@ -15,6 +15,7 @@
     <module>storage-service</module>
     <module>api-gateway</module>
     <module>discovery-server</module>
+    <module>config-service</module>
   </modules>
 
   <properties>

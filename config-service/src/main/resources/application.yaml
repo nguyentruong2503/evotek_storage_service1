@@ -1,0 +1,13 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/nguyentruong2503/evotek_spring_cloud_config
+          default-label: main  # branch
+          clone-on-start: true
