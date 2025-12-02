@@ -4,30 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
-
+  config:
+    import: "optional:configserver:http://localhost:8888/"
   cloud:
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: iam-service
-              uri: lb://IAM-SERVICE
-              predicates:
-                - Path=/iam-service/**
-              filters:
-                - RewritePath=/iam-service/(?<remaining>.*), /${remaining}
-
-            - id: storage-service
-              uri: lb://STORAGE-SERVICE
-              predicates:
-                - Path=/storage-service/**
-              filters:
-                - RewritePath=/storage-service/(?<remaining>.*), /${remaining}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-
+    config:
+      fail-fast: true
