@@ -83,8 +83,14 @@ Danh sách file:
 - Áp dụng các design Pattern vào dự án
 - Các API tuân thủ quy tắc Restful API
 
-
 Sử dụng Feign Client để giao tiếp giữa 2 service. Cấu hình Gateway để nhận request từ client rồi điều hướng đến đúng service.
 Dùng Eureka để đăng ký các service, không phải sử dụng port để call nhau.
+
+Tích hợp các chức năng giám sát  Monitoring/Logging (Theo dõi CPU, memory, request latency, error rate)
+Prometheus: Đi thu thập số liệu sức khỏe (CPU, RAM, số lượng Request) từ các service về.
+Grafana: Vẽ biểu đồ từ số liệu của Prometheus và quản lý việc gửi cảnh báo.
+ELK Stack (Logstash - Elasticsearch - Kibana): Gom toàn bộ Log (nhật ký hoạt động/lỗi) từ các service về một chỗ để dễ tìm kiếm và tra cứu lỗi.
+Zipkin: Vẽ sơ đồ đường đi của Request qua các service để biết nó bị chậm ở khâu nào (đo độ trễ).
+Telegram Bot: Nhận tin nhắn cảnh báo từ Grafana để báo cho bạn biết ngay khi hệ thống vượt ngưỡng (CPU quá tải).
 
 
