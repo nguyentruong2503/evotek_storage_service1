@@ -67,7 +67,7 @@ Danh sách file:
 2. Tích hợp IAM Service và Storage Service bằng Keycloak
 - IAM Service gọi sang Storage Service để upload và quản lý ảnh profile cá nhân, và các loại file khác
 - IAM Server xác thực với Storage Service bằng client credentials (server-to-server)
-3. Import & Export dữ liệu ra file Excel (CSV)
+3. Import & Export dữ liệu ra file Excel
 - Xử lý ở IAM Service
 - API Import dữ liệu users:
 •	Import dữ liệu người dùng  từ file excel.
